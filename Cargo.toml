@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-handlebars = "4.3.7"
+handlebars = { version = "4.3.7", features = ["dir_source"] }
 serde = { version = "1.0.171", features = ["derive"] }

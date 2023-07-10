@@ -1,26 +1,18 @@
 use handlebars::Handlebars;
+use server::HttpServer;
 use std::{
     collections::BTreeMap,
     io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream},
+    net::TcpStream,
 };
 
 mod server;
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    let mut handlebars = Handlebars::new();
-    handlebars
-        .register_templates_directory(".hbs", "templates/")
-        .unwrap();
-
-    for stream in listener.incoming() {
-        let stream = stream.unwrap();
-
-        handle_connection(stream, &handlebars);
-    }
+    HttpServer::new("127.0.0.1:7878").run();
 }
 
+#[allow(dead_code)]
 fn handle_connection(mut stream: TcpStream, handlebars: &Handlebars) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader.lines().next().unwrap().unwrap();

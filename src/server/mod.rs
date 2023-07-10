@@ -1,6 +1,12 @@
 #![allow(dead_code, unused)]
 use handlebars::Handlebars;
-use std::{fmt::Display, io::BufReader, net, process};
+use std::{
+    fmt::Display,
+    io::{BufReader, Write},
+    net, process,
+};
+
+use self::{request::deserialize_request, response::generate_header};
 
 pub mod request;
 pub mod response;
@@ -40,7 +46,13 @@ impl HttpServer {
                     continue;
                 }
             };
-            let buf_reader = BufReader::new(&mut stream);
+            let request_info = match deserialize_request(&mut stream) {
+                Ok(info) => info,
+                Err(status) => {
+                    stream.write_all(generate_header(status).as_bytes());
+                    continue;
+                }
+            };
         }
     }
 }

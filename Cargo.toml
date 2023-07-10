@@ -1,6 +1,8 @@
 [package]
-name = "actix-blog"
+name = "htmx-rust"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+handlebars = "4.3.7"
+serde = { version = "1.0.171", features = ["derive"] }

@@ -1,17 +1,17 @@
 use std::fmt;
 
 pub enum Status {
-    Ok = 200,
-    NotFound = 404,
-    ServerError = 500,
+    Ok,
+    NotFound,
+    ServerError,
 }
 
-impl fmt::Display for Status {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({})", unsafe { *(self as *const Self as *const u8) })
+impl Status {
+    pub fn generate_header(&self) -> &str {
+        match *self {
+            Self::Ok => "HTTP/1.1 200 OK\n\n",
+            Self::NotFound => "HTTP/1.1 404 NOT FOUND\n\n",
+            Self::ServerError => "HTTP/1.1 500 SERVER ERROR\n\n",
+        }
     }
-}
-
-pub fn generate_header(status: Status) -> String {
-    format!("HTTP/1.1 {} {}", status, status.to_string())
 }

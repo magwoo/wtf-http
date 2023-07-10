@@ -6,7 +6,9 @@ use std::{
     net, process,
 };
 
-use self::{request::deserialize_request, response::generate_header};
+use crate::server::response::Status;
+
+use self::request::deserialize_request;
 
 pub mod request;
 pub mod response;
@@ -47,9 +49,11 @@ impl HttpServer {
                 }
             };
             let request_info = match deserialize_request(&mut stream) {
-                Ok(info) => info,
+                Ok(request_info) => request_info,
                 Err(status) => {
-                    stream.write_all(generate_header(status).as_bytes());
+                    let header = status.generate_header();
+                    println!("{}", header);
+                    stream.write_all(header.as_bytes());
                     continue;
                 }
             };

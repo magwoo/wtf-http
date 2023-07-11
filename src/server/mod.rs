@@ -1,14 +1,18 @@
 #![allow(dead_code, unused)]
 use handlebars::Handlebars;
 use std::{
+    collections::LinkedList,
     fmt::Display,
     io::{BufReader, Write},
     net, process,
 };
 
-use crate::server::response::Status;
+use crate::server::{
+    request::RequestInfo,
+    response::{HttpResponse, Status},
+};
 
-use self::request::deserialize_request;
+use self::request::{deserialize_request, Method, Route};
 
 pub mod request;
 pub mod response;
@@ -16,18 +20,18 @@ pub mod response;
 pub struct HttpServer {
     pub adress: &'static str,
     handlebars: Handlebars<'static>,
-    routes: Option<&'static [request::Route]>,
+    routes: Option<&'static [Route]>,
 }
 
 impl HttpServer {
-    pub fn new(adress: &'static str) -> Self {
+    pub fn new(adress: &'static str, routes: Option<&'static [Route]>) -> Self {
         let mut handlebars = Handlebars::new();
-        handlebars.register_templates_directory("hbs", "templates/");
+        handlebars.register_templates_directory("hbs", "templates/*");
 
         Self {
             adress,
             handlebars,
-            routes: None,
+            routes,
         }
     }
 
@@ -57,6 +61,30 @@ impl HttpServer {
                     continue;
                 }
             };
+
+            match self.routes {
+                Some(routes) => match search_route(routes, request_info) {
+                    Ok(response) => {
+                        let header = response.status.generate_header();
+                        let body = response.body.expect("test");
+                        stream.write_all(format!("{header}{body}").as_bytes());
+                    }
+                    Err(status) => {
+                        stream.write_all(status.generate_header().as_bytes());
+                    }
+                },
+                None => {
+                    stream.write_all(Status::NotFound.generate_header().as_bytes());
+                }
+            }
+        }
+        fn search_route(routes: &[Route], req_info: RequestInfo) -> Result<HttpResponse, Status> {
+            for route in routes {
+                if route.method == req_info.method && route.uri == req_info.uri {
+                    return Ok((route.handler)());
+                }
+            }
+            Err(Status::NotFound)
         }
     }
 }

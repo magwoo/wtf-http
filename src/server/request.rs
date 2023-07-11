@@ -4,7 +4,9 @@ use std::{
     net::TcpStream,
 };
 
-#[derive(Debug)]
+use super::response::HttpResponse;
+
+#[derive(PartialEq)]
 pub enum Method {
     Get,
     Post,
@@ -13,7 +15,7 @@ pub enum Method {
 pub struct Route {
     pub method: Method,
     pub uri: &'static str,
-    pub handler: &'static dyn Fn(),
+    pub handler: &'static dyn Fn() -> HttpResponse,
 }
 
 pub struct RequestInfo {

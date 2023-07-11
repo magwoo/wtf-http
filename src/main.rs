@@ -15,7 +15,7 @@ fn main() {
         uri: "/",
         handler: &home_page,
     }];
-    HttpServer::new("127.0.0.1:7878", Some(routes)).run();
+    HttpServer::bind("127.0.0.1:7878", Some(routes)).run();
 }
 
 fn home_page() -> HttpResponse {

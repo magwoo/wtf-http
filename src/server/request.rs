@@ -6,7 +6,7 @@ use std::{
 
 use super::response::HttpResponse;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Method {
     Get,
     Post,
@@ -18,6 +18,7 @@ pub struct Route {
     pub handler: &'static dyn Fn() -> HttpResponse,
 }
 
+#[derive(Debug)]
 pub struct RequestInfo {
     pub method: Method,
     pub uri: String,

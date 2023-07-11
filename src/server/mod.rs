@@ -24,7 +24,7 @@ pub struct HttpServer {
 }
 
 impl HttpServer {
-    pub fn new(adress: &'static str, routes: Option<&'static [Route]>) -> Self {
+    pub fn bind(adress: &'static str, routes: Option<&'static [Route]>) -> Self {
         let mut handlebars = Handlebars::new();
         handlebars.register_templates_directory("hbs", "templates/*");
 
@@ -35,7 +35,7 @@ impl HttpServer {
         }
     }
 
-    pub fn run(&self) {
+    pub fn run(self) {
         let listener = match net::TcpListener::bind(self.adress) {
             Ok(listener) => listener,
             Err(err) => {
@@ -78,9 +78,11 @@ impl HttpServer {
                 }
             }
         }
+
         fn search_route(routes: &[Route], req_info: RequestInfo) -> Result<HttpResponse, Status> {
             for route in routes {
                 if route.method == req_info.method && route.uri == req_info.uri {
+                    println!("{:?}", req_info);
                     return Ok((route.handler)());
                 }
             }
